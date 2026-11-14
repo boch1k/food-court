@@ -1,79 +1,15 @@
-# React + TypeScript + Vite
+## Описание проекта Food-Court (React + TypeScript + Vite):
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Архитектура: Mobile First, CSS на Tailwind v4. Разделение на pages (роуты) и components (изолированные UI-блоки). Роутинг классический компонентный (\<Routes>, \<Route>). Шапка <Header /> полностью изолирована от рендеров интерфейса.
 
-Currently, two official plugins are available:
+### Авторизация: По номеру телефона (СМС-код 1111). Логика сессии (AuthContext) и логика управления модальным окном (ModalContext) разделены на два независимых провайдера. Реализован умный Redirect Back (сохранение намерения) через returnUrl и защиту роутов <ProtectedRoute> с помощью useEffect и флага isLoggingOut.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react)
-  uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc)
-  uses [SWC](https://swc.rs/)
+### Работа с данными: Бэкенд имитируется через JSON Server (db.json, порт 3001).
 
-## React Compiler
+### Для отправки заказов написан кастомный хук useMutation с обработкой AbortController и try...catch.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it,
-see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Для безопасной параллельной загрузки данных профиля (/orders и /addresses) создан кастомный хук useFetch с защитой от Race Conditions через controller.abort() в функции очистки useEffect.
 
-## Expanding the ESLint configuration
+### Реализован умный редирект из CheckoutForm при пустой корзине с guard-заглушкой return null для предотвращения мигания UI.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also
-install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x)
-and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom)
-for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### На главной настроены ProductSkeleton (animate-pulse) и фильтрация продуктов.
