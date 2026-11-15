@@ -21,7 +21,6 @@ interface AuthContextType {
   orders: Orders;
   addresses: Addresses;
   leaving: boolean;
-  isUserDataLoading: boolean;
   logout: () => void;
   isAuthenticated: boolean;
   sendVerificationCode: (phone: string) => Promise<void>;
@@ -35,17 +34,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [leaving, setLeaving] = useState(false);
   const [user, setUser] = useLocalStorage<User | null>("food-court-user", null);
 
-  const orders = useFetchEffect(
+  const ordersState = useFetchEffect<OrderHistoryItem[]>(
     `${API_URL}/orders?userId=${user?.id}`,
     {},
     !!user?.id,
   );
+  const orders = { ...ordersState, data: ordersState.data ?? [] };
 
-  const addresses = useFetchEffect(
+  const addressesState = useFetchEffect<SavedAddress[]>(
     `${API_URL}/addresses?userId=${user?.id}`,
     {},
     !!user?.id,
   );
+  const addresses = { ...addressesState, data: addressesState.data ?? [] };
 
   const handleLogout = () => setLeaving(true);
 
