@@ -32,9 +32,9 @@ const getStatusDetails = (status: string) => {
 };
 
 export const Profile: React.FC = () => {
-  const { user, orders, addresses, isUserDataLoading } = useAuth();
+  const { user, orders, addresses } = useAuth();
 
-  if (isUserDataLoading) {
+  if (orders.loading || addresses.loading) {
     return (
       <div className="py-20 text-center text-gray-500 animate-pulse">
         ⏳ Загрузка вашего профиля и истории заказов...
