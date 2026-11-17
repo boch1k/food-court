@@ -17,19 +17,13 @@ jobs:
           docker compose up -d --build
           docker image prune -f
 
-      - name: Debug secrets to file
-        if: always()
-        run: |
-          printf "TOKEN=[%s]\nCHAT_ID=[%s]\n" "${{ secrets.TELEGRAM_TOKEN }}" "${{ secrets.TELEGRAM_CHAT_ID }}" > /home/github-runner/debug_tg.txt
-
       - name: Send Telegram notification
         if: always()
-        run: |
-          STATUS="✅ Деплой успешно завершен!"
-          if [ "${{ job.status }}" != "success" ]; then
-            STATUS="❌ Ошибка при деплое!"
-          fi
-
-          curl -4 -sS -X POST "https://api.telegram.org/bot{{ secrets.TELEGRAM_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d "text=${STATUS} (${{ github.repository }})"
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ job.status == 'success' && '✅ Деплой успешно завершен!' || '❌ Ошибка при деплое!' }}
+            📦 Проект: ${{ github.repository }}
+            💬 Коммит: ${{ github.event.head_commit.message }}
