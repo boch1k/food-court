@@ -9,8 +9,6 @@ export const Header = () => {
     const {user, logout, isAuthenticated} = useAuth();
     const {openAuthModal} = useModal();
 
-    console.log("header рендер");
-
     return (
         <header className="w-full mb-6 border-b border-gray-100">
             <div className="flex flex-wrap gap-2 items-center justify-between max-w-312.5 p-4 sm:p-5 font-sans">

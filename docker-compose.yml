@@ -13,7 +13,7 @@ services:
     container_name: my-json-server
     working_dir: /data
     # Устанавливаем json-server и запускаем его на файле db.json
-    command: sh -c "npx -y json-server --watch db.json --host 0.0.0.0 --port 3001"
+    command: sh -c "npx -y json-server@1.0.0-beta.15 db.json --host 0.0.0.0 --port 3001"
     volumes:
       # линк файла на сервере с файлом внутри контейнера
       - /home/github-runner/app-data/db.json:/data/db.json
