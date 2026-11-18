@@ -11,10 +11,4 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"), // Относительный путь @ на папку src
     },
   },
-  server: {
-    watch: {
-      // файл json-server, чтобы Vite его игнорировал
-      ignored: ["**/db.json"],
-    },
-  },
 });

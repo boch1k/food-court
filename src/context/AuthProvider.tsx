@@ -1,8 +1,7 @@
 ﻿import { createContext, type ReactNode, useContext, useState } from "react";
 import { type OrderHistoryItem, type SavedAddress, type User } from "@/types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useFetchEffect } from "@/hooks/useFetch";
-import { API_URL } from "@/api/config";
+import { getAddresses, getOrders } from "@/utils/localData";
 
 type Orders = {
   data: OrderHistoryItem[];
@@ -34,19 +33,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [leaving, setLeaving] = useState(false);
   const [user, setUser] = useLocalStorage<User | null>("food-court-user", null);
 
-  const ordersState = useFetchEffect<OrderHistoryItem[]>(
-    `${API_URL}/orders?userId=${user?.id}`,
-    {},
-    !!user?.id,
-  );
-  const orders = { ...ordersState, data: ordersState.data ?? [] };
-
-  const addressesState = useFetchEffect<SavedAddress[]>(
-    `${API_URL}/addresses?userId=${user?.id}`,
-    {},
-    !!user?.id,
-  );
-  const addresses = { ...addressesState, data: addressesState.data ?? [] };
+  const orders: Orders = {
+    data: user ? getOrders(user.id) : [],
+    loading: false,
+    error: undefined,
+  };
+  const addresses: Addresses = {
+    data: user ? getAddresses(user.id) : [],
+    loading: false,
+    error: undefined,
+  };
 
   const handleLogout = () => setLeaving(true);
 

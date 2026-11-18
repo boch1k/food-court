@@ -4,9 +4,8 @@ import { useAuth } from "@/context/AuthProvider";
 import { useCart } from "@/context/CartProvider";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useMutation } from "@/hooks/useMutation";
 import { type OrderHistoryItem } from "@/types";
-import { API_URL } from "@/api/config";
+import { saveAddress, saveOrder } from "@/utils/localData";
 
 interface CheckoutFormProps {
   onSuccess: () => void;
@@ -17,8 +16,6 @@ interface FormErrors {
   address?: string;
 }
 
-type OrderInput = Omit<OrderHistoryItem, "id" | "createdAt">;
-
 export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const { cart, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
@@ -26,11 +23,8 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const [name, setName] = useState(user?.name || "");
   const [address, setAddress] = useState("");
   const [formErrors, setFormErrors] = useState<FormErrors>({});
-  // const navigate = useNavigate();
-  const { mutate, isLoading, error } = useMutation<
-    OrderHistoryItem,
-    OrderInput
-  >(`${API_URL}/orders`);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   /* Обработчик формы */
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -57,7 +51,6 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
     if (!user) return;
 
     const bodyData = {
-      userId: user.id,
       items: cart.map((item) => ({
         productId: item.product.id,
         name: item.product.name,
@@ -70,15 +63,25 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
     };
 
     try {
-      const result = await mutate(bodyData);
-      // result зто наш post?
+      setIsLoading(true);
+      setError(null);
+      const result: OrderHistoryItem = saveOrder(user.id, bodyData);
+      saveAddress(user.id, {
+        id: `addr_${Date.now()}`,
+        city: "",
+        street: address.trim(),
+        house: "",
+        isDefault: true,
+      });
       if (result) {
         clearCart();
         onSuccess();
       }
     } catch (err) {
-      // пустой catch нужен, чтобы прервать цепочку выполнения при падении fetch
       console.error("Ошибка при отправке заказа:", err);
+      setError("Не удалось сохранить заказ в этом браузере");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -91,7 +94,7 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
 
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 border border-red-100">
-            ⚠️ Не удалось отправить заказ
+            ⚠️ {error}
           </div>
         )}
 
