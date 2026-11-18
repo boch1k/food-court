@@ -2,6 +2,7 @@
 import { type OrderHistoryItem, type SavedAddress, type User } from "@/types";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getAddresses, getOrders } from "@/utils/localData";
+import { useCallback } from "react";
 
 type Orders = {
   data: OrderHistoryItem[];
@@ -24,6 +25,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   sendVerificationCode: (phone: string) => Promise<void>;
   verifyCode: (code: string) => Promise<void>;
+  refreshStoredData: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +34,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [tempPhone, setTempPhone] = useState("");
   const [leaving, setLeaving] = useState(false);
   const [user, setUser] = useLocalStorage<User | null>("food-court-user", null);
+  const [, setDataRevision] = useState(0);
+  const refreshStoredData = useCallback(() => {
+    setDataRevision((revision) => revision + 1);
+  }, []);
 
   const orders: Orders = {
     data: user ? getOrders(user.id) : [],
@@ -80,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated: !!user,
         sendVerificationCode,
         verifyCode,
+        refreshStoredData,
       }}
     >
       {children}

@@ -18,7 +18,7 @@ interface FormErrors {
 
 export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
   const { cart, totalPrice, clearCart } = useCart();
-  const { user } = useAuth();
+  const { user, refreshStoredData } = useAuth();
 
   const [name, setName] = useState(user?.name || "");
   const [address, setAddress] = useState("");
@@ -73,6 +73,7 @@ export const CheckoutForm = ({ onSuccess }: CheckoutFormProps) => {
         house: "",
         isDefault: true,
       });
+      refreshStoredData();
       if (result) {
         clearCart();
         onSuccess();
